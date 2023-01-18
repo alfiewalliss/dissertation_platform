@@ -1,0 +1,25 @@
+{% extends "blog/base.html" %}
+{% block content %}
+{% load static %}
+<article class="media content-section">
+    <div class="media-body">
+        <div class="article-metadata">
+        <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+        <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ object.author }}</a>
+        <small class="text-muted">{{ object.date_posted|date:"d N Y" }}</small>
+        {% if object.author == user %}
+            <div>
+                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'blog-update' object.id %}">Update Post</a>
+                <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'blog-delete' object.id %}">Delete Post</a>
+            </div>
+        {% endif %}
+        </div>
+        <div class="text-center">
+            <h2 class="article-title"> {{ object.title }}</h2>
+            <p class="article-content">{{ object.content }}</p>
+        </div>
+        <a class="btn btn-primary float-end mr-2 mb-2" href="{{ object.file.url }}" target="_blank">View Full PDF In New Tab</a>
+        <embed src="{{ object.file.url }}" height="1180vh" width="815vw">
+    </div>
+    </article>
+{% endblock content %}
