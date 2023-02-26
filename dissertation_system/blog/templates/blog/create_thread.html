@@ -1,0 +1,22 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+    <div class="container">
+
+        <div class="row">
+            <div class="col-md-12 p-5">
+                <h3> Start a Conversation! </h3>
+            </div>
+        </div>
+
+
+        <form method="POST">
+            {% csrf_token %}
+            <p>Enter the username for the user</p>
+            {{ form | crispy }}
+            <button class="btn btn-success mt-3" type="submit">Continue</button> 
+        </form>
+    </div>
+
+
+{% endblock content %}

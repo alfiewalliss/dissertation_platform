@@ -2,15 +2,23 @@
 {% load crispy_forms_tags %}
 {% block content %}
     <div class="content-section">
-        <form method="POST" enctype="multipart/form-data">
+        <legend class="border-bottom mb-4">Your Post</legend>
+        <small class="text-muted">This information is required for other users to properly cite your work in academic or research endeavors.</small>
+        <br>
+        <label>Publisher Name*</label>
+        <br>
+        <input type="text" class="textinput textInput form-control" value="{{user.first_name}} {{user.last_name}}" disabled>
+        <form class="mt-2" method="POST" enctype="multipart/form-data">
             {% csrf_token %}
             <fieldset class="form-group">
-                <legend class="border-bottom mb-4">Your Post</legend>
                 {{ form| crispy }}
+                <a href="{% url 'tag-info' %}" data-toggle="tooltip" data-placement="top" title="How tags work?"><i class="fa-regular fa-circle-question"></i></a>
             </fieldset>
-            <div class="form-group">
+            <div class="form-group mt-3">
                 <button class="btn btn-outline-info" type="submit">Post</button>
             </div>
         </form>
     </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    {{ form.media.js }}
 {% endblock content %}

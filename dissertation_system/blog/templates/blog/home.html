@@ -1,15 +1,20 @@
 {% extends "blog/base.html" %}
 {% block content %}
     {% for post in posts %}
-    <article class="media content-section">
+      <article class="media content-section">
         <div class="media-body">
           <div class="article-metadata">
             <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
             <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
-            <small class="text-muted">{{ post.date_posted|date:"d N Y" }}</small>
+            <small class="text-muted"> {{ post.date_posted|date:"d N Y" }} | </small>
+            <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Likes"> {{ post.likes.all.count }} <i class="fa-solid fa-thumbs-up"></i>  | </small>
+            <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Dislike"> {{ post.dislikes.all.count }} <i class="fa-solid fa-thumbs-down"></i>  | </small>
+            <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Comments"> {{ post.comments.all.count }} <i class="fa-solid fa-comment"></i>  | </small>
+            <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Saves"> {{ post.saves.all.count }} <i class="fa-solid fa-bookmark"></i>  | </small>
+
           </div>
           <h2><a class="article-title" href="{% url 'blog-detail' post.id %}">{{ post.title }}</a></h2>
-          <p class="article-content">{{ post.content }}</p>
+          <p class="article-content">{{ post.abstract }}</p>
         </div>
       </article>
     {% endfor %}

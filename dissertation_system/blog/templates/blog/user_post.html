@@ -1,19 +1,102 @@
 {% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
 {% block content %}
-    <h1 class="mb-3">Posts by {{ view.kwargs.username }}</h1>
-    <h3>Listing {{ page_obj.paginator.count }} posts</h3>
+
+<script>
+  function myFunction(bool) 
+  {
+    var x = document.getElementById("Follow");
+    var y = document.getElementById("Unfollow");
+    if (y.style.display != "block" && bool == false) 
+    {
+      y.style.display = "block";
+    } else if (y.style.display != "block" && bool == true) 
+    {
+      x.style.display = "block";
+    }
+  }
+
+  function populate(id, name)
+  {
+    document.getElementById(id).value = name
+    document.getElementById(id).style.display = "none";
+  }
+</script>
+
+
+
+
+    <img class="rounded-circle article-img" src="{{ user1.profile.image.url }}">
+    <h1 class="mb-3" style="display:inline">{{ name }}</h1>
+    {% if user1.profile.admin != 0 %}
+    <pre class="text-secondary float-end mt-3 data" style="display:inline" data-toggle="tooltip" data-placement="top" title="Verified"> <i class="fa-solid fa-circle-check"></i> |</pre>
+    {% elif user.profile.admin != 0 %}
+    <pre class="text-secondary float-end mt-3 data" style="display:inline"> <a style="color: #1c74fd; text-decoration: underline;" type="button" data-toggle="modal" data-target="#promoteUser">Promote User</a> |</pre>
+    {% endif %}
+    <pre class="text-secondary float-end mt-3 data" style="display:inline">| Followers: {{ user1.profile.followers.all.count }} |</pre>
+    <pre class="text-secondary float-end mt-3 data" style="display:inline">| Following: {{ user1.profile.following.all.count }} </pre>
+    <br>
+    <br>
+    <h5>Tags:</h5>
+    {% if user1.profile.tags.count > 0 %}
+      |
+      {% for i in user1.profile.tags.all %}
+        <span><a href="{% url 'tag-list' i.pk%}">{{i.tags}}</a> |</span>
+      {% endfor%}
+    {% else %}
+      <span>This user has no tags!</span>
+    {% endif %}
+    <h5 class="mt-3">Bio:</h5>
+    <p class="pb-3"> {{user1.profile.bio}}</p>
+    {% if name != user.username %}
+      <form method="POST" class="float-end">
+        {% csrf_token %}
+        {{ form | crispy }}
+        <button class="btn btn-outline-info float-end m-1 mt-0" type="submit" data-toggle="tooltip" data-placement="top" title="Message"><i class="fa-solid fa-envelope"></i></button> 
+      </form>
+    {% endif %}
+    <script>populate('name', '{{name}}')</script>
+    {% if name == user.username %}
+      <a class="btn btn-outline-info float-end m-1 mt-0" href="{% url 'profile' %}">Edit Profile</a>
+    {% endif %}
+    <form action="{% url 'user-follow' user1.profile.id %}" method="POST" class="d-inline">
+      {% csrf_token %}
+      <button id="Follow" type=submit style="display:none" class="btn btn-outline-info m-1 mt-0 float-end" name="post_id" value="{{ user1.profile.id }}">Follow</button>
+    </form>
+    
+    <form action="{% url 'user-follow' user1.profile.id %}" method="POST" class="d-inline">
+      {% csrf_token %}
+      <button id="Unfollow" type=submit style="display:none" class="btn btn-outline-info m-1 mt-0 float-end" name="post_id" value="{{ user1.profile.id }}">Unfollow</button>
+    </form>
+    
+
+    {% if user.profile != user1.profile %}
+      {% for follower in user.profile.following.all %}
+        {% if user1 == follower.user %}
+          <script>myFunction(false)</script>
+        {% endif %}
+      {% endfor %}
+      <script>myFunction(true)</script>
+    {% endif %}
+
+    <h3>Listing {{ posts.count }} posts</h3>
     {% for post in posts %}
     <article class="media content-section">
-        <div class="media-body">
-          <div class="article-metadata">
-            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
-            <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
-            <small class="text-muted">{{ post.date_posted|date:"d N Y" }}</small>
-          </div>
-          <h2><a class="article-title" href="{% url 'blog-detail' post.id %}">{{ post.title }}</a></h2>
-          <p class="article-content">{{ post.content }}</p>
+      <div class="media-body">
+        <div class="article-metadata">
+          <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+          <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
+          <small class="text-muted"> {{ post.date_posted|date:"d N Y" }} | </small>
+          <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Likes"> {{ post.likes.all.count }} <i class="fa-solid fa-thumbs-up"></i>  | </small>
+          <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Dislike"> {{ post.dislikes.all.count }} <i class="fa-solid fa-thumbs-down"></i>  | </small>
+          <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Comments"> {{ post.comments.all.count }} <i class="fa-solid fa-comment"></i>  | </small>
+          <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Saves"> {{ post.saves.all.count }} <i class="fa-solid fa-bookmark"></i>  | </small>
+
         </div>
-      </article>
+        <h2><a class="article-title" href="{% url 'blog-detail' post.id %}">{{ post.title }}</a></h2>
+        <p class="article-content">{{ post.abstract }}</p>
+      </div>
+    </article>
     {% endfor %}
     <div class="text-center">
     {% if is_paginated %}
@@ -34,4 +117,30 @@
       {% endif %}
     {% endif %}
   </div>
+
+<!-- Modal -->
+<div class="modal fade" id="promoteUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg" role="document">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabel">Promote User</h5>
+          </div>
+          <div class="modal-body text-center">
+            <p style="font-weight: bold;">Are you sure you wish to promote the user "{{user1.username}}"?</p>
+            Promoting a user makes them verified meaning they can peer review work effecting its performance.
+            <p class="text-danger">This action is irriversible, be sure the user is reliable before promotion.</p>
+          </div>
+          <div class="row">
+            <div class="w-75 center mx-auto mb-5">
+              <a type="button" style="display:inline; width:42%" class="btn btn-primary" href="{% url 'promote' user1.profile.pk %}">Promote</a>
+              <button type="button" style="display:inline; width:42%" class="btn btn-danger float-end" data-dismiss="modal">Cancel</button>
+            </div>
+          </div>
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          </div>
+      </div>
+  </div>
+</div>
 {% endblock content %}
+

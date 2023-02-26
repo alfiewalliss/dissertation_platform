@@ -1,0 +1,30 @@
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<h1 style="background-color: #105d95; color: white; margin:auto; text-align: center;">Dissertation Exchange</h1>
+<br>
+Dear {{ user }},
+<br>
+<br>
+Thank you for signing up for our platform. To ensure the security of our users, we require all accounts to be verified
+before they can be activated.
+<br>
+<br>
+To verify your email address, please click on the link below:
+<br>
+<br>
+{% autoescape off %}
+http://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+{% endautoescape %}
+<br>
+<br>
+Once you have verified your email address, you will be able to login and access all the features of our platform.
+<br>
+<br>
+Thank you for choosing our platform, we are excited to have you on board.
+<br><br>
+Best regards,
+<br><br>
+Dissertation Exchange

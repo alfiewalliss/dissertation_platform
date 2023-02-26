@@ -1,0 +1,68 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% load static %}
+{% block content %}
+<script>
+    function submitForm(id)
+    {
+        document.getElementById(id).submit()
+    }
+</script>
+
+    <div class="container">
+            <div class="card">
+                <div class="p-3">
+                    {% if thread.user == user %}
+                        <img class="rounded-circle article-img" src="{{ thread.receiver.profile.image.url }}">
+                        <h5 class="mr-2 w-75" style="display:inline"><a href="{% url 'user-posts' thread.receiver.username %}">{{ thread.receiver }}</a></h3>
+                    {% else %}
+                        <img class="rounded-circle article-img" src="{{ thread.user.profile.image.url }}">
+                        <h5 class="w-75" style="display:inline" href="{% url 'user-posts' thread.user.username %}">{{ thread.user }}</a>
+                    {% endif %}
+                    <a href="{% url 'delete-thread' thread.pk %}" class="btn btn-danger btn-sm m-1 mt-3 float-end" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa-solid fa-trash"></i></a>
+                </div>
+            </div>
+        {% if message_list.all.count == 0 %}
+        <div class="row my-5">
+            <div class="col-md-12">
+                <p class="empty-text">No messages</p>
+            </div>
+        </div>
+        {% endif %}
+
+        {% for message in message_list %}
+            <div class="row">
+                {% if message.receiver_user == request.user %}
+                    <div class="col-md-12 my-1">
+                        <div class="sent-message my-3">
+                            <p>{{ message.body }}</p>
+                        </div>
+                    </div>
+                {% elif message.sender_user == request.user %}
+                    <div class="col-md-12 my-1 mr-0">
+                        <div class="received-message my-3">
+                            <p class="mb-0">{{ message.body }}</p>
+                            <a class="text-muted" onclick="submitForm('{{message.pk}}')"><i class="fa-regular fa-trash-can"></i></a>
+                            <form id="{{message.pk}}" method="POST" action="{% url 'delete-message' message.pk thread.pk %}">
+                                {% csrf_token %}<input type="delete-message" value="DELETE" hidden>
+                            </form>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+        <div class="row">
+            <div class="card col-md-12 p-3 shadow-sm">
+                <form method="POST" action="{% url 'create-message' thread.pk %}">
+                    {% csrf_token %}
+                    {{ form | crispy }}
+                    <div class="d-grid gap-2 mt-3">
+                        <button class="btn btn-light" type="submit"> Send Message</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <br>
+    </div>
+
+{% endblock content %}

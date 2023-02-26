@@ -1,7 +1,11 @@
 {% extends "blog/base.html" %}
 {% block content %}
 <h2>You have been logged out</h2>
-    <div class="border-top pt-3">
-        <small class="text-muted">Do you wish to sign back in? <a href="{% url 'login' %}">Click here</a></small>
-    </div>
+<div class="border-top pt-3">
+    <small class="text-muted">Do you wish to sign back in? <a href="{% url 'login' %}">Click here</a></small>
+</div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css" rel="stylesheet"
+    type="text/css" />
 {% endblock content %}

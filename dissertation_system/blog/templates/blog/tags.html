@@ -1,0 +1,50 @@
+{% extends "blog/base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+<script>
+    const included = [];
+    function selectFunction(id)
+    {
+        if (included.includes(id))
+        {
+            document.getElementById(id).style="background-color:white; color:black"
+            document.getElementById(id+"l").selected=false
+            delete included[included.indexOf(id)]
+        }
+        else
+        {
+            document.getElementById(id).style="background-color:blue; color:white"
+            document.getElementById(id+"l").selected=true
+            included.push(id)
+        }
+    }
+</script>
+<div class="content-section">
+    <h1 class="m-2">Tags</h1>
+    <h4 class="m-2">Delete Tags</h4>
+    <div>
+        {% for tag in tags %}
+            <div id="{{tag.pk}}" class="card pt-2 pb-2 m-2 p-2 w-100 border" onclick="selectFunction('{{tag.pk}}')">
+                <p class="m-0 p-0">{{tag.tags}}</p>
+            </div>
+        {% endfor %}
+    </div>
+    <form method="POST" action="{% url 'tag-delete' %}">
+        {% csrf_token %}
+        <select id="selection" name="select" class="w-100" hidden multiple>
+            {% for tag in tags %}
+                <option id="{{tag.pk}}l">{{tag.pk}}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary m-2 mt-0">Remove Tags</button>
+    </form>
+
+
+    <h4 class="m-2">Add Tags</h4>
+    <form class="m-2" method="GET" action="{% url 'tag-add' %}">
+        {% csrf_token %}
+        <input name="new" type="text" placeholder="Tag" class="form-control w-25">
+        <button type="submit" class="btn btn-primary mt-2 mb-2">Add Tags</button>
+    </form>
+</div>
+{% endblock content %}

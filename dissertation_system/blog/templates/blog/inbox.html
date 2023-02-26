@@ -1,0 +1,29 @@
+{% extends "blog/base.html" %}
+{% block content %}
+    <div class="container">
+        <div class="row">
+            <div class="col-md-12 p-5">
+                <h3> Your Conversations</h3>
+            </div>
+        </div>
+        {% for thread in threads.all %}
+            <div class="card">
+                <div class="p-3">
+                    {% if thread.user == user %}
+                        <img class="rounded-circle article-img" src="{{ thread.receiver.profile.image.url }}">
+                        <h5 class="w-75" style="display:inline">{{ thread.receiver }}</h5>
+                    {% elif thread.receiver == user %}
+                        <img class="rounded-circle article-img" src="{{ thread.user.profile.image.url }}">
+                        <h5 class="w-75" style="display:inline">{{ thread.user }}</h5>
+                    {% endif %}
+                    <a class="stretched-link" href="{% url 'thread' thread.pk %}"></a>
+                    <a href="{% url 'delete-thread' thread.pk %}" style="z-index: 2; position: relative;"class="btn btn-danger btn-sm m-1 mt-3 float-end" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa-solid fa-trash"></i></a>
+                </div>
+            </div>
+            <br>
+        {% endfor %}
+    </div>
+
+
+{% endblock content %}
+
