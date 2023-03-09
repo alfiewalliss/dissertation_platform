@@ -6,18 +6,35 @@
                 <h3> Your Conversations</h3>
             </div>
         </div>
+        {% if threads.all.count == 0%}
+        <div class="row my-5">
+            <div class="col-md-12">
+                <p class="empty-text">No messages</p>
+                <p class="text-muted w-100 data" style="text-align: center;">To start a conversation with someone, go to their profile and press the  <i class="fa-solid fa-envelope"></i>  button.</p>
+            </div>
+        </div>
+        {% endif %}
         {% for thread in threads.all %}
             <div class="card">
                 <div class="p-3">
                     {% if thread.user == user %}
                         <img class="rounded-circle article-img" src="{{ thread.receiver.profile.image.url }}">
                         <h5 class="w-75" style="display:inline">{{ thread.receiver }}</h5>
+                        <a href="{% url 'delete-thread' thread.pk %}" style="z-index: 2; position: relative;"class="btn btn-danger btn-sm m-1 mt-3 float-end" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa-solid fa-trash"></i></a>
+                        {% if thread.new == "sender" %}
+                            <a href="{% url 'delete-thread' thread.pk %}" style="z-index: 2; position: relative;"class="m-1 mt-3 float-end" data-toggle="tooltip" data-placement="top" title="New Messages"><i class="fa-solid fa-circle"></i></a>
+                        {% endif %} 
+                        <small class="m-1 mt-3 text-muted">{{thread.last_message|date:"d/m/y H:i"}}</small>
                     {% elif thread.receiver == user %}
                         <img class="rounded-circle article-img" src="{{ thread.user.profile.image.url }}">
                         <h5 class="w-75" style="display:inline">{{ thread.user }}</h5>
+                        <a href="{% url 'delete-thread' thread.pk %}" style="z-index: 2; position: relative;"class="btn btn-danger btn-sm m-1 mt-3 float-end" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa-solid fa-trash"></i></a>
+                        {% if thread.new == "receiver" %}
+                            <a href="{% url 'delete-thread' thread.pk %}" style="z-index: 2; position: relative;"class="m-1 mt-3 float-end" data-toggle="tooltip" data-placement="top" title="New Messages"><i class="fa-solid fa-circle"></i></a>
+                        {% endif %}
+                        <small class="m-1 mt-3 text-muted">{{thread.last_message|date:"d/m/y H:i"}}</small>
                     {% endif %}
                     <a class="stretched-link" href="{% url 'thread' thread.pk %}"></a>
-                    <a href="{% url 'delete-thread' thread.pk %}" style="z-index: 2; position: relative;"class="btn btn-danger btn-sm m-1 mt-3 float-end" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa-solid fa-trash"></i></a>
                 </div>
             </div>
             <br>

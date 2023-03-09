@@ -1,0 +1,20 @@
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<h1 style="background-color: #105d95; color: white; margin:auto; text-align: center;">Dissertation Exchange</h1>
+<br>
+Dear {{ user }},
+<br>
+<br>
+{% if review == "1" %}
+<b>Congradulations!</b><br> Your paper has passed the peer review process! Below are the notes from the reviewer: "{{reviewer}}".
+{% elif review == "2" %}
+<b>Sorry!</b><br> Your paper has failed the peer review process! Please look at the notes below and implement any feedback before requesting peer review again.
+{% endif %}
+<h4>Notes:</h4>
+<div class="mt-0">{{notes}}</div>
+<br>
+Best regards,
+<br>
+Dissertation Exchange

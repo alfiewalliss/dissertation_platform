@@ -133,7 +133,7 @@
           <i class="fa-solid fa-bookmark"></i> | </small>
       </div>
       <h2><a class="article-title" href="{% url 'blog-detail' post.id %}">{{ post.title }}</a></h2>
-      <p class="article-content">{{ post.abstract }}</p>
+      <p class="article-content text-muted">{{ post.abstract }}</p>
     </div>
   </article>
   {% endfor %}

@@ -1,5 +1,5 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Post, Comment, Thread, MessageModel, Tag
+from .models import Post, Comment, Thread, MessageModel, Tag, Notification
 from .forms import CommentForm, ThreadForm, MessageForm, PostForm
 from django.views.generic import (
     ListView,
@@ -11,27 +11,34 @@ from django.views.generic import (
 )
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.contrib.auth.models import User
-from django.http import FileResponse, HttpResponseRedirect, HttpResponse
+from django.http import FileResponse, HttpResponseRedirect, HttpResponse, JsonResponse
 from django.urls import reverse, reverse_lazy
 from django.shortcuts import redirect
 from users.models import Profile
 from django.db.models import Q
 from django.contrib import messages
-from dal import autocomplete
+from django.template.loader import render_to_string
+from django.utils.encoding import force_bytes
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.contrib.auth.tokens import default_token_generator
+from django.contrib.sites.shortcuts import get_current_site
+from django.core.mail import send_mail
+from datetime import datetime, timedelta
+import pytz
 
 
 # Create your views here.
-def home(request):
-    context = {"posts": Post.objects.all}
-    return render(request, "blog/home.html", context)
+
 
 
 class PostListView(ListView):
-    model = Post
-    template_name = "blog/home.html"
-    context_object_name = "posts"
-    ordering = ["-date_posted"]
-    paginate_by = 5
+    def get(self, request):
+        posts = Post.objects.all().order_by("-likes")[:6]
+        context = {
+            "posts": posts
+        }
+        return render(request, "blog/home.html", context)
+
 
 
 class UserPostListView(ListView):
@@ -165,6 +172,28 @@ class PostDetailView(DetailView):
         for i in range(post.comments.all().count()):
             temp_list.append(post.comments.all()[i])
 
+        # Check if user is able to request peer review
+        # can_request: 0 = Not author; 1 = request available; 2 = requested
+        if self.request.user == post.author: #Check if user owns post
+            print("1")
+            if post.requested == "requested": # Check if peer review has been requested
+                print("2")
+                utc=pytz.UTC
+                date = datetime.now() - timedelta(days=7)
+                if post.requested_time.replace(tzinfo=utc) < date.replace(tzinfo=utc): # Check if it has been requested within the last week
+                    print("3")
+                    can_request = 1 #Request available
+                else:
+                    print("4")
+                    can_request = 2 #Requested
+            else:
+                print("5")
+                can_request = 1 #Request available
+        else: #User doesn't own post
+            print("6")
+            can_request = 0 # Not author 
+        
+        context["can_request"] = can_request
         context["total_likes"] = total_likes
         context["liked"] = liked
         context["total_dislikes"] = total_dislikes
@@ -177,7 +206,7 @@ class PostDetailView(DetailView):
 class PostCreateView(LoginRequiredMixin, CreateView):
     model = Post
     form_class = PostForm
-
+        
     def form_valid(self, form):
         form.instance.author = self.request.user
         messages.success(self.request, "Post successfully uploaded")
@@ -192,6 +221,11 @@ class CommentCreateView(LoginRequiredMixin, CreateView):
         return reverse("blog-detail", args=[self.kwargs["pk"]])
 
     def form_valid(self, form):
+        post = get_object_or_404(Post, id=self.kwargs["pk"])
+        author = post.author
+        if author != self.request.user:
+            noti = Notification(receiver=author, kind=2, heading="New comment on " + post.title, content=("New comment from " + self.request.user.username))
+            noti.save()
         form.instance.username_id = self.request.user.id
         form.instance.post1_id = self.kwargs["pk"]
         return super(CommentCreateView, self).form_valid(form)
@@ -271,6 +305,9 @@ def like(request, pk):
     if post.likes.filter(id=request.user.id).exists():
         post.likes.remove(request.user)
     else:
+        if post.author != request.user:
+            noti = Notification(receiver=post.author, kind=3, heading="New like on " + post.title, content=("New like from " + request.user.username))
+            noti.save()
         post.likes.add(request.user)
     return HttpResponseRedirect(reverse("blog-detail", args=[str(pk)]))
 
@@ -284,6 +321,9 @@ def follow(request, pk):
         else:
             request.user.profile.following.add(user1)
             user1.followers.add(request.user.profile)
+            if user1.user != request.user:
+                noti = Notification(receiver=user1.user, kind=2, heading="New follow", content=("New follow from " + request.user.username))
+                noti.save()
     return HttpResponseRedirect(reverse("user-posts", args=[str(user1.user)]))
 
 
@@ -307,8 +347,7 @@ def saves(request, pk):
 
 class ListThreads(View):
     def get(self, request, *args, **kwargs):
-        threads = Thread.objects.filter(Q(user=request.user) | Q(receiver=request.user))
-
+        threads = Thread.objects.filter(Q(user=request.user) | Q(receiver=request.user)).order_by("-last_message")
         context = {"threads": threads}
 
         return render(request, "blog/inbox.html", context)
@@ -344,7 +383,12 @@ class ThreadView(View):
     def get(self, request, pk, *args, **kwargs):
         form = MessageForm()
         thread = Thread.objects.get(pk=pk)
-        message_list = MessageModel.objects.filter(thread__pk__contains=pk)
+        if thread.new == "sender" and thread.user == request.user:
+            thread.new = "none"
+        elif thread.new == "receiver" and thread.receiver == request.user:
+            thread.new = "none"
+        thread.save()
+        message_list = MessageModel.objects.filter(thread__pk__contains=pk).order_by("-date")
         context = {"thread": thread, "form": form, "message_list": message_list}
 
         return render(request, "blog/thread.html", context)
@@ -386,8 +430,16 @@ class CreateMessage(View):
         thread = Thread.objects.get(pk=pk)
         if thread.receiver == request.user:
             receiver = thread.user
+            thread.new = "sender"
+            noti = Notification(receiver=thread.sender, kind=0, heading="New message", content=("New message from " + request.user.username))
+            noti.save()
+            
         else:
             receiver = thread.receiver
+            thread.new = "receiver"
+            noti = Notification(receiver=thread.receiver, kind=0, heading="New message", content=("New message from " + request.user.username))
+            noti.save()
+        thread.last_message = datetime.now()
         message = MessageModel(
             thread=thread,
             sender_user=request.user,
@@ -395,6 +447,7 @@ class CreateMessage(View):
             body=request.POST.get("message"),
         )
         message.save()
+        thread.save()
         return redirect("thread", pk=pk)
 
 
@@ -413,6 +466,9 @@ def like_comment(request, ppk, cpk):
         comment.likes.remove(request.user)
     else:
         comment.likes.add(request.user)
+        if comment.username.user != request.user:
+                noti = Notification(receiver=comment.username.user, kind=5, heading="Comment like", content=("New comment like from from " + request.user.username))
+                noti.save()
     return HttpResponseRedirect(reverse("blog-detail", args=[str(ppk)]))
 
 
@@ -457,7 +513,7 @@ class UserFeedListView(ListView):
     template_name = "blog/user_feed.html"
     paginate_by = 5
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         users = request.user.profile
         posts = (
             Post.objects.filter(
@@ -469,6 +525,18 @@ class UserFeedListView(ListView):
         context = {"posts": posts}
         return render(request, "blog/user_feed.html", context)
 
+class UserReviewListView(ListView):
+    model = Post
+    template_name = "blog/user_review.html"
+    paginate_by = 5
+
+    def get(self, request):
+        users = request.user.profile
+        posts = Post.objects.filter(
+            Q(reviewers=request.user)
+        )
+        context = {"posts": posts}
+        return render(request, "blog/user_review.html", context)
 
 def tag_follow(request, pk):
     tag = get_object_or_404(Tag, id=pk)
@@ -478,8 +546,10 @@ def tag_follow(request, pk):
         tag.followers.add(request.user)
     return HttpResponseRedirect(reverse("tag-list", args=[str(pk)]))
 
-def tag_info(request):
-    return render(request, "blog/tag_info.html")
+def site_info(request, information):
+    print(information)
+    context = {"information": information}
+    return render(request, "blog/site_info.html", context)
 
 
 def promote(request, pk):
@@ -487,6 +557,104 @@ def promote(request, pk):
         user1 = get_object_or_404(Profile, id=pk)
         user1.admin = 1
         user1.save()
+        noti = Notification(receiver=user1.user, kind=6, heading="Promotion", content=("Congradulations, you have been promoted to a reviewer by " + request.user.username))
+        noti.save()
     return HttpResponseRedirect(reverse("user-posts", args=[user1.user.username]))
     
+class ReviewDetailView(DetailView):
+    model = Post
+    template_name = "blog/review.html"
+
+    def get_context_data(self, **kwargs):
+        context = super(ReviewDetailView, self).get_context_data(**kwargs)
+        post = get_object_or_404(Post, id=self.kwargs["pk"])
+        total_likes = post.total_likes()
+        total_dislikes = post.total_dislikes()
+        total_saves = post.total_saves()
+        liked = False
+        disliked = False
+        saved = False
+        if post.likes.filter(id=self.request.user.id).exists():
+            liked = True
+        if post.dislikes.filter(id=self.request.user.id).exists():
+            disliked = True
+        if post.saves.filter(id=self.request.user.id).exists():
+            saved = True
+        temp_list = []
+        for i in range(post.comments.all().count()):
+            temp_list.append(post.comments.all()[i])
+
+        context["total_likes"] = total_likes
+        context["liked"] = liked
+        context["total_dislikes"] = total_dislikes
+        context["disliked"] = disliked
+        context["total_saves"] = total_saves
+        context["saved"] = saved
+        return context
+
+def review_form(request, pk):
+    review_user = request.user
+    if request.user.profile.admin != 0:
+        notes = request.GET.get("notes")
+        answer = request.GET.get("pass")
+        post = get_object_or_404(Post, id=pk)
+        user = post.author
+        post.reviewed = answer
+        post.requested = "none"
+        post.save()
+        mail_subject = "Your Peer Review results!"
+        message = render_to_string(
+            "blog/review_email.html",
+            {
+                "user": user,
+                "review": str(answer),
+                "notes": notes,
+                "reviewer": review_user,
+            },
+        )
+        message_html = render_to_string(
+            "blog/review_email.html",
+            {
+                "user": user,
+                "review": str(answer),
+                "notes": notes,
+                "reviewer": review_user,
+            },
+        )
+        to_email = user.email
+        send_mail(mail_subject, message, "noreply@dissertationexchange.com", [to_email], html_message=message_html)
+        if user != request.user:
+            noti = Notification(receiver=user, kind=7, heading="Review Complete", content=("Check your email for more details"))
+            noti.save()
+    return HttpResponseRedirect(reverse("blog-detail", args=[pk]))
+
+def request_review(request, pk):
+    post = get_object_or_404(Post, id=pk)
+    post.requested = "requested"
+    users = Profile.objects.filter(
+                Q(admin=1) | Q(admin=0) | Q(tags__tags__icontains=post.primary_tag.tags) | Q(tags__in=post.secondary_tags.all()))# | Q(id!=request.user.profile.id)
+            #).order_by("?")
+    reviewers = round(len(users) * 0.05) # 5% selection rate 
+    if reviewers < 5:
+        if len(users) < 5:
+            reviewers = len(users)
+        else:
+            reviewers = 5
+    users = users[0:5]
+    for i in users:
+        post.reviewers.add(i.user)
+    post.requested_time = datetime.now()
+    post.save()
     
+    return HttpResponseRedirect(reverse("blog-detail", args=[pk]))
+
+
+def update_notification_new(request, pk):
+    notification = Notification.objects.get(pk=pk)
+    if(notification.new == 1):
+        change = 1
+    else:
+        notification.new = 1
+        notification.save()
+        change = 0
+    return JsonResponse({'success': True, 'change': change})

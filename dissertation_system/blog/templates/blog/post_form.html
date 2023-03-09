@@ -12,7 +12,7 @@
             {% csrf_token %}
             <fieldset class="form-group">
                 {{ form| crispy }}
-                <a href="{% url 'tag-info' %}" data-toggle="tooltip" data-placement="top" title="How tags work?"><i class="fa-regular fa-circle-question"></i></a>
+                <a href="{% url 'site-info' 'tags'%}" data-toggle="tooltip" data-placement="top" title="How tags work?"><i class="fa-regular fa-circle-question"></i></a>
             </fieldset>
             <div class="form-group mt-3">
                 <button class="btn btn-outline-info" type="submit">Post</button>

@@ -17,12 +17,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>  
         <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
         <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css"/>
-        
-        {% if title %}
-            <title>Django-blog -- {{title}}</title>
-        {% else %}
-            <title>Django Blog</title>
-        {% endif %}
+        <title>Dissertation Exchange</title>
     </head>
     <body>
         <header class="site-header">
@@ -40,7 +35,7 @@
                         <a class="nav-item nav-link" href="{% url 'blog-create' %}" data-toggle="tooltip" data-placement="top" title="New Post"><i class="fa-solid fa-pen"></i></a>
                     {% endif %}
                   </div>
-                  <div class="navbar-nav w-100 form-row justify-content-center pt-3">
+                  <div class="navbar-nav w-100 form-row justify-content-center pt-0">
                     <div class="form-group col-md-3 w-75">
                       <form class="input-group" method="GET" action="{% url 'blog-search' 0 %}">
                         {% csrf_token %}
@@ -63,13 +58,66 @@
                   <!-- Navbar Right Side -->
                   <div class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                        <a class="nav-item nav-link" href="{% url 'inbox' %}" data-toggle="tooltip" data-placement="top" title="Messages"><i class="fa-solid fa-inbox"></i></a>
-                        <a class="nav-item nav-link" href="{% url 'user-saves' user.username %}" data-toggle="tooltip" data-placement="top" title="Saved Posts"><i class="fa-solid fa-bookmark"></i></a>
-                        <a class="nav-item nav-link" href="{% url 'user-posts' user.username %}" data-toggle="tooltip" data-placement="top" title="Profile"><i class="fa-solid fa-user"></i></a>
-                        <a class="nav-item nav-link" href="{% url 'logout' %}" data-toggle="tooltip" data-placement="top" title="Logout"><i class="fa-solid fa-right-from-bracket"></i></a>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-list-3" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                          <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbar-list-3">
+                          <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="fa-stack">
+                                  <i class="fa-regular fa-comment fa-stack-2x"></i>
+                                  <strong id="counter" class="fa-stack-1x">{{counter}}</strong>
+                                </span>
+                              </a>
+                              <div class="dropdown-menu dropdown-menu1 border ml-5">
+                                <h4 class="dropdown-header border-bottom">Notifications</h4>
+                                {% for notification in notification_processor %}
+                                <a id="{{notification.id}}" class="dropdown-item border-top border-bottom notification-item" onclick="remove_blue(this.id + ' dot', this.id)" data-notification-id="{{ notification.id }}">
+                                  <h5 class="mt-2">{{notification.heading}}</h5>
+                                  {% if notification.new == 0 %}
+                                    <p id="{{notification.id}} dot" style="float:right;"><i data-toggle="tooltip" data-placement="top" title="New Messages" class="fa-solid fa-circle" style="color: #0e6dfd;"></i></p>
+                                  {% endif %}
+                                  <p> &ensp; {{notification.content}}</p>
+                                </a>
+                                {% endfor %}
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
+
+                        
+
+
+
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-list-4" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                          <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbar-list-4">
+                          <ul class="navbar-nav">
+                              <li class="nav-item dropdown">
+                              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="{{user.profile.image.url}}" width="40" height="40" class="rounded-circle">
+                              </a>
+                              <div class="dropdown-menu border" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="{% url 'user-posts' user.username %}">Profile</a>
+                                <a class="dropdown-item" href="{% url 'site-info' ' ' %}">Information</a>
+                              {% if user.profile.admin != 0 %}
+                                <a class="dropdown-item" href="{% url 'list-review' %}">Post Review</a>
+                                {% endif %}
+                                <a class="dropdown-item" href="{% url 'inbox' %}">Messages</a>
+                                <a class="dropdown-item" href="{% url 'user-saves' user.username %}">Saved Posts</a>
+                                <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+
+                              </div>
+                            </li>   
+                          </ul>
+                        </div>
+                        
                     {% else %}
-                        <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
-                        <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+                      <a class="nav-item nav-link" href="{% url 'site-info' ' ' %}" data-toggle="tooltip" data-placement="top" title="Information"><i class="fa-solid fa-circle-info"></i></a>
+                      <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+                      <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
                     {% endif %}
                   </div>
                 </div>
@@ -78,7 +126,8 @@
           </header>
 
 
-          <main role="main" class="container pt-5">
+          <main role="main" class="container">
+            {% block content0 %}{% endblock %}
             <div class="row">
               <div class="col-md-8">
                 {% if messages %}
@@ -91,11 +140,14 @@
                 {% block content %}{% endblock %}
               </div>
               <div class="col-md-4">
-                <div class="content-section">
+                <div class="content-section position-fixed">
                   <h3>Dissertation Exchange</h3>
                   <p class='text-muted'>Site Information
                     <ul class="list-group">
-                      <a href="{% url 'tag-info' %}" class="list-group-item list-group-item-light">Tags</a>
+                      <a href="{% url 'site-info' ' '%}" class="list-group-item list-group-item-light">General</a>
+                      <a href="{% url 'site-info' 'review'%}" class="list-group-item list-group-item-light">Peer Review</a>
+                      <a href="{% url 'site-info' 'tags' %}" class="list-group-item list-group-item-light">Tags</a>
+                      <a href="{% url 'site-info' 'verification' %}" class="list-group-item list-group-item-light">Verification</a>
                     </ul>
                   </p>
                 </div>
@@ -124,6 +176,28 @@
               source: availableTags
             });
           } );
+
+  
+          function remove_blue(id, id1) {
+            var x = document.getElementById(id)
+            x.style.display = "none";
+            $.ajax({
+              url: '/notifications/' + id1 + '/update_new/',
+              success: function(response) {
+                console.log(response);
+                if (response.change == 0){
+                  document.getElementById("counter").innerHTML = String(Number(document.getElementById("counter").innerHTML) - 1)
+                }
+              }
+            });
+            
+          }
+          
+          $('div.dropdown-menu').on('click', function(event){
+            // The event won't be propagated up to the document NODE and 
+            // therefore delegated events won't be fired
+            event.stopPropagation();
+          });
 
         </script>
     </body>

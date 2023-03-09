@@ -1,0 +1,144 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="{% static 'blog/main.css' %}">
+        <script src="https://kit.fontawesome.com/e78854f37e.js" crossorigin="anonymous"></script>
+        <script src="https://code.jquery.com/jquery-3.6.0.slim.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.0/dist/js/bootstrap.bundle.min.js"></script>
+        <script> $(function () { $('[data-toggle="tooltip"]').tooltip();});</script>
+        {{ form.media.css }}
+        {{ p_form.media.css }}
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.js"></script>  
+        <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.js"></script>
+        <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/themes/ui-lightness/jquery-ui.css" rel="stylesheet" type="text/css"/>
+        <title>Dissertation Exchange</title>
+    </head>
+    <body>
+        <header class="site-header">
+            <nav class="navbar navbar-expand-md navbar-dark bg-steel fixed-top">
+              <div class="container">
+                <a class="navbar-brand mr-4" href="{% url 'blog-home' %}">Dissertation Exchange</a>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarToggle" aria-controls="navbarToggle" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse w-75" id="navbarToggle">
+                  <div class="navbar-nav me-auto">
+                    <a class="nav-item nav-link" href="{% url 'blog-home' %}" data-toggle="tooltip" data-placement="top" title="Home"><i class="fa-solid fa-house"></i></a>
+                    {% if user.is_authenticated %}
+                        <a class="nav-item nav-link" href="{% url 'user-feed' %}" data-toggle="tooltip" data-placement="top" title="Your Feed"><i class="fa-solid fa-people-group"></i></a>
+                        <a class="nav-item nav-link" href="{% url 'blog-create' %}" data-toggle="tooltip" data-placement="top" title="New Post"><i class="fa-solid fa-pen"></i></a>
+                    {% endif %}
+                  </div>
+                  <div class="navbar-nav w-100 form-row justify-content-center pt-0">
+                    <div class="form-group col-md-3 w-75">
+                      <form class="input-group" method="GET" action="{% url 'blog-search' 0 %}">
+                        {% csrf_token %}
+                        <select class="form-select" name="u" id="dropdown-search">
+                          <option value="0">All</option>
+                          <option value="1">Posts</option>
+                          <option value="2">Users</option>
+                          <option value="3">Comments</option>
+                          <option value="4">Tags</option>
+                        </select>
+                        <div class="form-outline w-75">
+                          <input id="search" type="search" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Search Here..." required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                          <i class="fa-solid fa-magnifying-glass"></i>
+                        </button>
+                      </form>
+                  </div>
+                  </div>
+                  <!-- Navbar Right Side -->
+                  <div class="navbar-nav ms-auto">
+                    {% if user.is_authenticated %}
+                    <div class="collapse navbar-collapse w-75" id="navbarToggle">
+                        <div class="navbar-nav me-auto">
+                          <a class="nav-item nav-link" href="{% url 'blog-create' %}" data-toggle="tooltip" data-placement="top" title="Notifications">
+                            <span class="fa-stack">
+                              <i class="fa-regular fa-comment fa-stack-2x"></i>
+                              <strong class="fa-stack-1x">{{notification_processor.count}}</strong>
+                            </span>
+                          </a>
+                        </div>
+                      </div>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-list-4" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                          <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbar-list-4">
+                          <ul class="navbar-nav">
+                              <li class="nav-item dropdown">
+                              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <img src="{{user.profile.image.url}}" width="40" height="40" class="rounded-circle">
+                              </a>
+                              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="{% url 'user-posts' user.username %}">Profile</a>
+                                <a class="dropdown-item" href="{% url 'site-info' ' ' %}">Information</a>
+                              {% if user.profile.admin != 0 %}
+                                <a class="dropdown-item" href="{% url 'list-review' %}">Post Review</a>
+                                {% endif %}
+                                <a class="dropdown-item" href="{% url 'inbox' %}">Messages</a>
+                                <a class="dropdown-item" href="{% url 'user-saves' user.username %}">Saved Posts</a>
+                                <a class="dropdown-item" href="{% url 'logout' %}">Logout</a>
+
+                              </div>
+                            </li>   
+                          </ul>
+                        </div>
+                        
+                    {% else %}
+                      <a class="nav-item nav-link" href="{% url 'site-info' ' ' %}" data-toggle="tooltip" data-placement="top" title="Information"><i class="fa-solid fa-circle-info"></i></a>
+                      <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
+                      <a class="nav-item nav-link" href="{% url 'register' %}">Register</a>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </nav>
+          </header>
+
+
+          <main role="main" class="container">
+            {% if messages %}
+            {% for messages in messages %}
+                <div class="alert alert-{{ messages.tags }}">
+                    {{ messages }}
+                </div>
+            {% endfor %}
+            {% endif %}
+            {% block content %}{% endblock %}
+              </div>
+            </div>
+          </main>
+
+        
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js" integrity="sha384-w76AqPfDkMBDXo30jS1Sgez6pr3x5MlQ1ZAGC+nuZB+EYdgRZgiwxhTBTkF7CXvN" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js" integrity="sha384-mQ93GR66B00ZXjt0YO5KlohRA5SY2XofN4zfuZxLkoj1gXtW8ANNCe9d5Y3eG5eD" crossorigin="anonymous"></script>
+        <script>
+          $( function() {
+            var availableTags = [
+              {% for tag in tags_context %}
+                "{{tag}}",
+              {% endfor %}
+              {% for post in post_context %}
+                "{{post}}",
+              {% endfor %}
+              {% for comment in comment_context %}
+                "{{comment}}",
+              {% endfor %}
+            ];
+            $( "#search" ).autocomplete({
+              source: availableTags
+            });
+          } );
+
+        </script>
+    </body>
+</html>

@@ -1,40 +1,69 @@
-{% extends "blog/base.html" %}
+{% extends "blog/base1.html" %}
 {% block content %}
-    {% for post in posts %}
-      <article class="media content-section">
-        <div class="media-body">
-          <div class="article-metadata">
-            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
-            <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
-            <small class="text-muted"> {{ post.date_posted|date:"d N Y" }} | </small>
-            <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Likes"> {{ post.likes.all.count }} <i class="fa-solid fa-thumbs-up"></i>  | </small>
-            <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Dislike"> {{ post.dislikes.all.count }} <i class="fa-solid fa-thumbs-down"></i>  | </small>
-            <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Comments"> {{ post.comments.all.count }} <i class="fa-solid fa-comment"></i>  | </small>
-            <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Saves"> {{ post.saves.all.count }} <i class="fa-solid fa-bookmark"></i>  | </small>
-
-          </div>
-          <h2><a class="article-title" href="{% url 'blog-detail' post.id %}">{{ post.title }}</a></h2>
-          <p class="article-content">{{ post.abstract }}</p>
+<div style="height:30em">
+  <h1 id="heading" class="w-100 pt-4" style="text-align:center">Dissertation Exchange</h1>
+  <hr id="rule">
+  <div id="background" class="w-100 row" style="background-image: url('media/background.jpg'); background-size: cover">
+    <div class="w-50 col-sm-12 my-auto pt-5 pb-5 rounded" style="display: block; margin-left: auto; margin-right: auto; background-color: #cbd5db">
+      <p class="empty-text">Begin your Search Here:</p>
+      <form class="input-group pt-4 pb-3" style="text-align: center" method="GET" action="{% url 'blog-search' 0 %}">
+        {% csrf_token %}
+        <select class="form-select" name="u" id="dropdown-search">
+          <option value="0">All</option>
+          <option value="1">Posts</option>
+          <option value="2">Users</option>
+          <option value="3">Comments</option>
+          <option value="4">Tags</option>
+        </select>
+        <div class="form-outline w-75">
+          <input id="search" type="search" name="q" value="{{ request.GET.q }}" class="form-control" placeholder="Search Here..." required>
         </div>
-      </article>
-    {% endfor %}
-    <div class="text-center">
-    {% if is_paginated %}
-      {% if page_obj.has_previous %}
-        <a class="btn btn-outline-info mb-4"href="?page=1">1</a>
-      {% endif %}
-
-      {% for num in page_obj.paginator.page_range %}
-        {% if page_obj.number == num %}
-        <a class="btn btn-info mb-4"href="?page={{ num }}">{{ num }}</a>
-        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' and num != 1 and num != page_obj.paginator.num_pages%}
-        <a class="btn btn-outline-info mb-4"href="?page={{ num }}">{{ num }}</a>
-        {% endif%}
-      {% endfor %}
-
-      {% if page_obj.has_next %}
-        <a class="btn btn-outline-info mb-4"href="?page={{ page_obj.paginator.num_pages }}">{{ page_obj.paginator.num_pages }}</a>
-      {% endif %}
-    {% endif %}
+        <button type="submit" class="btn btn-primary">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </button>
+      </form>
+    </div>
   </div>
+</div>
+
+<div class="text-muted w-100 mt-5 mb-0" style="text-align:center;">
+  <a href="#most"><img class="m-0 mover" src="media/arrow.png" style="height:auto; max-width: 10em;"></a>
+</div>
+
+<h5 class="w-100 text-muted mt-3" style="text-align:center">Most liked posts on Dissertation Exchange</h5>
+<div id="most" class="mt-5">
+  {% for post in posts %}
+    {% if forloop.counter0|divisibleby:2 %}
+      <div class="row mt-5 mb-5">
+      <div class="col">
+      <div class="content-section h-100">
+    {% else %}
+      <div class="col">
+      <div class="content-section float-right h-100">
+    {% endif %}
+          <div class="media-body row">
+            <div class="article-metadata">
+              <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+              <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
+              <small class="text-muted"> {{ post.date_posted|date:"d N Y" }} | </small>
+              <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Likes"> {{ post.likes.all.count }} <i class="fa-solid fa-thumbs-up"></i>  | </small>
+              <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Dislike"> {{ post.dislikes.all.count }} <i class="fa-solid fa-thumbs-down"></i>  | </small>
+              <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Comments"> {{ post.comments.all.count }} <i class="fa-solid fa-comment"></i>  | </small>
+              <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Saves"> {{ post.saves.all.count }} <i class="fa-solid fa-bookmark"></i>  | </small>
+            </div>
+            <h4><a class="article-title" href="{% url 'blog-detail' post.id %}">{{ post.title }}</a></h4>
+          </div>
+        </div>
+        </div>
+      {% if not forloop.counter0|divisibleby:2 %}
+        </div>
+      {%endif%}
+  {% endfor %}
+</div>
+<script>
+  first = document.getElementById("heading").offsetHeight;
+  second = document.getElementById("rule").offsetHeight;
+  document.getElementById("background").style.height = "calc(100% - " + String(first - second)  + "px)";
+</script>
+
 {% endblock content %}

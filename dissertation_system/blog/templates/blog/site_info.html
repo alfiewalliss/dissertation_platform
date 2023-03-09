@@ -1,0 +1,162 @@
+{% extends "blog/base.html" %}
+{% block content %}
+<script>
+    function move() {
+        const id = '{{information}}';
+        const yOffset = -80;
+        const element = document.getElementById(id);
+        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+
+        window.scrollTo({ top: y, behavior: 'smooth' });
+    }
+</script>
+<h1>Site Information</h1>
+<div class="content-section">
+    <h2 id="platform">Our Platform</h2>
+    <div class="m-2">
+        <h3>What is the aim of Dissertation Exchange?</h3>
+        <div class="mt-2 mb-4">
+            The aim of Dissertation Exchange is to provide a centralised platform for students throughout the UK to
+            publish their work. We understand that the process of uploading work to other journals can be
+            time-consuming
+            and tedious. Student-led research is often discarded once the project or assessment is complete, despite
+            its
+            potential to contribute to academia. Dissertation Exchange aims to make student-led research accessible
+            while maintaining academic credibility through a quality <a href="#review">peer-review system</a>. Our goal
+            is to create a
+            friendly environment where students can interact with one another to discuss student-produced
+            literature.
+        </div>
+    </div>
+</div>
+<div class="content-section">
+    <h2 id="review"> Peer Review </h2>
+    <div class="m-2">
+        <h3>Who can review your post?</h3>
+        <div class="mt-2 mb-4">
+            At Dissertation Exchange, anyone who is <a href="#verification">verified</a> can review posts,
+            provided they have at least one profile tag that matches a <a href="#tags">tag</a> associated with the paper
+            they wish to
+            evaluate. If a user is not verified or lacks matching tags, they can still share their opinions in the
+            comments section. We encourage all users to be constructive and respectful when leaving comments. Our
+            aim is
+            to foster a community that values open and honest feedback while maintaining a supportive environment
+            for
+            all users.
+        </div>
+
+        <h3>What is the peer review process?</h3>
+        <div class="mt-2 mb-4">
+            The goal of Dissertation Exchange is to bridge the gap between academic credibility and accessibility.
+            To
+            achieve this, we have streamlined the peer review process, making it simple yet effective. Reviewers
+            fill
+            out a form that provides feedback on the paper and then render a verdict on its academic value. Once the
+            form is submitted, the author of the paper will receive an email containing the review verdict, as well
+            as
+            the notes made by the reviewer. Papers that pass the process will be marked as academically credible,
+            while
+            those that fail will be marked as unreliable. If your paper does not pass the process, you can attempt
+            to
+            get it reviewed again after implementing the relevant feedback provided by the original reviewer. Our
+            peer
+            review process is designed to increase the volume of quality, peer-reviewed literature on our site,
+            making
+            it an excellent resource for students and researchers alike.
+        </div>
+
+        <h3>How can I apply for my paper to be peer review?</h3>
+        <div class="mt-2 mb-4">
+            At Dissertation Exchange, we do not require an application form for peer review of your paper. Reviewers
+            are
+            free to select any work that interests them and has matching tags. If you want to increase interest in
+            your
+            paper, you can directly message a <a href="#verification">verified</a> user with matching <a
+                href="#tags">tags</a> to inquire if they would be willing
+            to
+            review
+            it. A verified user has the symbol "<i class="fa-solid fa-circle-check"></i>" on their profile. This is
+            the
+            best
+            way to get your paper noticed by potential reviewers and increase your chances of getting it reviewed.
+            Our
+            platform is designed to facilitate the peer review process and help students and researchers receive
+            constructive feedback from their peers.
+        </div>
+    </div>
+</div>
+
+<div id="tags" class="content-section">
+    <h2> Tags </h2>
+    <div class="m-2">
+        <h3>What are tags?</h3>
+        <div class="mt-4">
+            We understand you may have some questions about tags and how they work on our platform. Tags are labels
+            that
+            help categorize users and posts so that people can search for and discover content relevant to their
+            interests.
+            For example, if someone tags their post as 'mythology', then a user looking for mythology-related
+            content
+            can
+            look for posts with that tag.
+        </div>
+
+        <div class="mt-4">
+            Tags can be applied to posts and users. Posts must have one primary tag, but they can have multiple
+            secondary
+            tags. On the other hand, users can have zero or many tags. If a user has a tag that matches a post's
+            tag,
+            then the user
+            is able to peer review the post. This is a great way to ensure quality and accuracy in the content
+            posted.
+        </div>
+
+    </div>
+</div>
+
+<div class="content-section">
+    <h2 id="verification"> Verification </h2>
+    <div class="m-2">
+        <h3>What does being verified mean?</h3>
+        <div class="mt-2 mb-4">
+            At Dissertation Exchange, being verified means that a user has gone through a verification process,
+            which
+            enables them to review papers with tags matching their profile. We have implemented this process to
+            ensure a
+            fair and unbiased review process. We want to prevent any possibility of unfair or unhelpful reviews,
+            which
+            could
+            be left by trolls or those who lack the necessary expertise in the subject area of the paper. By
+            verifying
+            users, we aim to maintain the quality of our peer review process and ensure that all reviews are
+            constructive,
+            relevant, and helpful to the authors.
+        </div>
+
+        <h3>How can you become verified?</h3>
+        <div class="mt-2 mb-4">
+            At Dissertation Exchange, we aim to keep the verification process simple to encourage more users to
+            become
+            verified, which, in turn, increases the volume of peer-reviewed literature on our platform. Verified
+            users
+            have
+            the ability to promote other users to also become verified. It is crucial that verified users only
+            promote
+            users
+            they believe are trustworthy and responsible, and who will not violate the trust placed upon them. The
+            promotion
+            of users to verified status is an irreversible process. At Dissertation Exchange, we operate on a
+            trust-based
+            system and require all users to act responsibly. If you are unverified and wish to become verified, you
+            should
+            message a verified user, preferably in your subject field, and explain why they should promote you. If
+            they
+            believe that you are trustworthy and knowledgeable in the relevant subject area, they may choose to
+            promote
+            you.
+        </div>
+    </div>
+</div>
+
+<script>move()</script>
+{% endblock content %}

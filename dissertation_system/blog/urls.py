@@ -21,6 +21,8 @@ from .views import (
     UserFeedListView,
     UserPostListView,
     UserSaveListView,
+    ReviewDetailView,
+    UserReviewListView,
 )
 
 urlpatterns = [
@@ -53,8 +55,12 @@ urlpatterns = [
     path("tags/add/", views.tags_add, name="tag-add"),
     path("tags/<int:pk>/", TagListView.as_view(), name="tag-list"),
     path("tags/<int:pk>/follow/", views.tag_follow, name="tag-follow"),
-    path("tags/info/", views.tag_info, name='tag-info'),
+    path("info/<str:information>/", views.site_info, name='site-info'),
     path("feed/", UserFeedListView.as_view(), name="user-feed"),
+    path("reviews/", UserReviewListView.as_view(), name="list-review"),
     path("promote/<int:pk>/", views.promote, name="promote"),
-
+    path("review/<int:pk>/", ReviewDetailView.as_view(), name="review"),
+    path("reviewed/<int:pk>", views.review_form, name="review-form"),
+    path("review/request/<int:pk>", views.request_review, name="request-review"),
+    path('notifications/<int:pk>/update_new/', views.update_notification_new, name='update_notification_new'),
 ]

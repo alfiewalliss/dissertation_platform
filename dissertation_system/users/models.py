@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
-from blog.models import Tag
+from blog.models import Tag, Post
 
-#User._meta.get_field('email')._unique = True
+User._meta.get_field('email')._unique = True
 
 # Create your models here.
 class Profile(models.Model):

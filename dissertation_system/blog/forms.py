@@ -45,7 +45,7 @@ class PostForm(forms.ModelForm):
         model = Post
         fields = ('publisher', 'publication_date', 'identifier', 'version', 'title', 'abstract', 'file', 'primary_tag', 'secondary_tags')
         widgets = {
-            'file': forms.FileInput(attrs={'accept':'application/pdf'}),
+            'file': forms.FileInput(attrs={'accept':'application/pdf', 'id':'file'}),
             'primary_tag': PrimaryTagWiget(),
             'secondary_tags': SecondaryTagsWidget(),
         }

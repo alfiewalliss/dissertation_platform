@@ -75,6 +75,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "blog.custom_context_processor.tag_renderer",
+                "blog.custom_context_processor.notification_renderer",
             ],
         },
     },
@@ -90,6 +91,12 @@ DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
+    },
+    'replica': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': 'myproject',
+        'HOST': 'dbreplica',
+        'MIRROR': 'default'
     }
 }
 

@@ -1,0 +1,101 @@
+{% extends "blog/base2.html" %}
+{% block content %}
+{% load static %}
+
+<script>
+    function enableLikes()
+    {
+        document.getElementById('like').className = "btn d-inline btn-success btn-sm m-1 mt-0 float-end disabled";
+        document.getElementById('dislike').className = "btn d-inline btn-danger btn-sm m-1 mt-0 float-end";
+        document.getElementById('dislike').innerHTML = '<i class="fa-solid fa-thumbs-down"></i>'
+        document.getElementById('dislike').title = 'Remove Dislike'
+
+
+    }
+
+    function enableDislikes()
+    {
+        document.getElementById('like').className = "btn d-inline btn-success btn-sm m-1 mt-0 float-end";
+        document.getElementById('dislike').className = "btn d-inline btn-danger btn-sm m-1 mt-0 float-end disabled";
+        document.getElementById('like').innerHTML = '<i class="fa-solid fa-thumbs-up"></i>'
+        document.getElementById('like').title = 'Remove Like'
+    }
+
+    function copy(id, button_id)
+    {
+        try {
+            navigator.clipboard.writeText(document.getElementById(id).innerHTML);
+            console.log('Page URL copied to clipboard');
+        } catch (err) {
+            console.error('Failed to copy: ', err);
+        }
+        document.getElementById(button_id).innerHTML = '<i class="fa-solid fa-check"></i>'
+        setTimeout(() => {  document.getElementById(button_id).innerHTML = '<i class="fa-solid fa-copy"></i>'; }, 2000);
+    }
+</script>
+<article class="media content-section">
+    <div class="media-body">
+        <div class="article-metdata">
+        <div class="text-center mt-4">
+            <h2 class="article-title"><u>{{ object.title }}</u></h2>
+        </div>
+        <div class="float-end mt-4 mb-2">
+            <a class="btn btn-primary float-end mr-2 mb-2" href="{{ object.file.url }}" target="_blank">View PDF In New Tab</a>
+        </div>
+        <div class="container2">
+            <iframe class="responsive-iframe" src="{{ object.file.url }}" style="height:74.3em;width:51em"></iframe>
+        </div>
+    </div>
+</article>
+
+<!--Modal-->
+<div class="modal fade" id="citeModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Cite</h5>
+            </div>
+            <div class="modal-body">
+                APA - Full details
+                <br>
+                <div id="1">
+                    {{object.author.last_name}}.{{object.author.first_name|make_list|first}}. ({{object.get_year}}). {{object.title}} ({{object.get_ordinal}} ed.). {{object.publisher}}
+                </div>
+                <button id="1.1" class="btn btn-primary btn-sm mt-1 mt-0 d-inline float-end" onclick="copy('1', this.id)"><i class="fa-solid fa-copy"></i></button>
+                <br>
+                APA - Inline details
+                <br>
+                <div id="2">
+                    ({{object.author.last_name}}, {{object.get_year}}, pp. {START_PAGE}-{END_PAGE})
+                </div>
+                <button id="2.1" class="btn btn-primary btn-sm mt-1 mt-0 d-inline float-end" onclick="copy('2', this.id)"><i class="fa-solid fa-copy"></i></button>
+                <br>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block content1%}
+<div class="article-metadata">
+    <div class="text-muted">Post data redacted to reduce any potential bias.</div>
+    <hr>
+    <h5>Peer Review:</h5>
+    <form class="mb-2" method="GET" action="{% url 'review-form' post.pk%}">
+        {% csrf_token %}
+        <label for="notes">Write your notes here: <small class="text-muted">(These notes will be sent to the author of this post. Please be respectful of peoples work and provide constructive feedback)</small></label>
+        <textarea class="textinput textInput form-control" name="notes" rows="47" id="notes"></textarea>
+        <label for="pass">Your decision:</label>
+        <select class="form-select" name="pass" id="dropdown-search">
+            <option value="1">Pass</option>
+            <option value="2">Fail</option>
+          </select>
+        <button type="submit" class="btn btn-primary mt-2 w-100">Submit</button>
+    </form>
+</div>
+{% endblock content1 %}
+
+
