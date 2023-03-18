@@ -2,6 +2,15 @@
 <!DOCTYPE html>
 <html>
     <head>
+      <!-- Google tag (gtag.js) -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=G-QGB33GKV6C"></script>
+      <script>
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', 'G-QGB33GKV6C');
+      </script>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" />
@@ -58,16 +67,50 @@
                   <!-- Navbar Right Side -->
                   <div class="navbar-nav ms-auto">
                     {% if user.is_authenticated %}
-                    <div class="collapse navbar-collapse w-75" id="navbarToggle">
-                      <div class="navbar-nav me-auto">
-                        <a class="nav-item nav-link" href="{% url 'blog-create' %}" data-toggle="tooltip" data-placement="top" title="Notifications">
-                          <span class="fa-stack">
-                            <i class="fa-regular fa-comment fa-stack-2x"></i>
-                            <strong class="fa-stack-1x">{{notification_processor.count}}</strong>
-                          </span>
-                        </a>
-                      </div>
-                    </div>
+                        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-list-3" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                          <span class="navbar-toggler-icon"></span>
+                        </button>
+                        <div class="collapse navbar-collapse" id="navbar-list-3">
+                          <ul class="navbar-nav">
+                            <li class="nav-item dropdown">
+                              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="fa-stack">
+                                  <i class="fa-regular fa-comment fa-stack-2x"></i>
+                                  <strong id="counter" class="fa-stack-1x">{{counter}}</strong>
+                                </span>
+                              </a>
+                              <div class="dropdown-menu dropdown-menu1 border ml-5">
+                                <h4 class="dropdown-header border-bottom">Notifications</h4>
+                                {% if notification_processor.count == 0%}
+                                <div class="row mt-3">
+                                  <div class="col-md-12">
+                                      <p class="empty-text">No Notifications</p>
+                                  </div>
+                                </div>
+                                {% endif %}
+                                {% for notification in notification_processor %}
+                                <a id="{{notification.id}}" class="dropdown-item border-top border-bottom notification-item" onclick="remove_blue(this.id + ' dot', this.id)">
+                                <div style="display:inline">
+                                  <button class="btn btn-danger" style="float:right; position:relative; z-index: 10;" onclick="delete_notification({{notification.id}})"><i class="fa-solid fa-trash-can"></i></button>
+                                  <p class="text-muted data" style="float:right;">
+                                    {{notification.date_created|date:"d N Y H:i" }} &#8192;
+                                  </p>
+                                </div>
+                                  <h5 class="mt-2">{{notification.heading}}</h5>
+                                  <p  style="float:right;">
+                                    {% if notification.new == 0 %}
+                                      <i id="{{notification.id}} dot" data-toggle="tooltip" data-placement="top" title="New Messages" class="fa-solid fa-circle" style="color: #0e6dfd;"></i>
+                                    {% else %}
+                                      <i id="{{notification.id}} dot" data-toggle="tooltip" data-placement="top" title="New Messages" class="fa-solid fa-circle" style="color: #0e6dfd; display: none;"></i>
+                                    {% endif %}
+                                  </p>
+                                  <p> &ensp; {{notification.content}}</p>
+                                </a>
+                                {% endfor %}
+                              </div>
+                            </li>
+                          </ul>
+                        </div>
                         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-list-4" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                           <span class="navbar-toggler-icon"></span>
                         </button>
@@ -75,9 +118,9 @@
                           <ul class="navbar-nav">
                               <li class="nav-item dropdown">
                               <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <img src="{{user.profile.image.url}}" width="40" height="40" class="rounded-circle">
+                                <img src="data:image/png;base64,{{ user.profile.blob_image }}" width="40" height="40" class="rounded-circle">
                               </a>
-                              <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+                              <div class="dropdown-menu border" aria-labelledby="navbarDropdownMenuLink">
                                 <a class="dropdown-item" href="{% url 'user-posts' user.username %}">Profile</a>
                                 <a class="dropdown-item" href="{% url 'site-info' ' ' %}">Information</a>
                               {% if user.profile.admin != 0 %}
@@ -91,7 +134,6 @@
                             </li>   
                           </ul>
                         </div>
-                        
                     {% else %}
                       <a class="nav-item nav-link" href="{% url 'site-info' ' ' %}" data-toggle="tooltip" data-placement="top" title="Information"><i class="fa-solid fa-circle-info"></i></a>
                       <a class="nav-item nav-link" href="{% url 'login' %}">Login</a>
@@ -143,6 +185,43 @@
               source: availableTags
             });
           } );
+
+  
+          function remove_blue(id, id1) {
+            $.ajax({
+              url: '/notifications/' + id1 + '/update_new/',
+              success: function(response) {
+                console.log(response);
+                if (response.change == 0){
+                  document.getElementById("counter").innerHTML = String(Number(document.getElementById("counter").innerHTML) - 1)
+                } else if (response.change == 1) {
+                  document.getElementById("counter").innerHTML = String(Number(document.getElementById("counter").innerHTML) + 1)
+                }
+                var x = document.getElementById(id)
+                if (x.style.display == "none")
+                {
+                  x.style.display = "block";
+                } else {
+                  x.style.display="none"
+                }
+              }
+            });
+          }
+
+          function delete_notification(id){
+            $.ajax({
+              url: '/notifications/' + id + '/delete/',
+              success: function(response) {
+                document.getElementById(id).style.display = "none"
+              }
+            })
+          }
+          
+          $('div.dropdown-menu').on('click', function(event){
+            // The event won't be propagated up to the document NODE and 
+            // therefore delegated events won't be fired
+            event.stopPropagation();
+          });
 
         </script>
     </body>

@@ -1,24 +1,68 @@
 {% extends "blog/base.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-    <div class="content-section">
-        <legend class="border-bottom mb-4">Your Post</legend>
-        <small class="text-muted">This information is required for other users to properly cite your work in academic or research endeavors.</small>
-        <br>
-        <label>Publisher Name*</label>
-        <br>
-        <input type="text" class="textinput textInput form-control" value="{{user.first_name}} {{user.last_name}}" disabled>
-        <form class="mt-2" method="POST" enctype="multipart/form-data">
-            {% csrf_token %}
-            <fieldset class="form-group">
-                {{ form| crispy }}
-                <a href="{% url 'site-info' 'tags'%}" data-toggle="tooltip" data-placement="top" title="How tags work?"><i class="fa-regular fa-circle-question"></i></a>
-            </fieldset>
-            <div class="form-group mt-3">
-                <button class="btn btn-outline-info" type="submit">Post</button>
+<div class="content-section">
+    <legend class="border-bottom mb-4">Your Post</legend>
+    <small class="text-muted">This information is required for other users to properly cite your work in academic or
+        research endeavors.</small>
+    <br>
+    <label>Publisher Name*</label>
+    <br>
+    <input type="text" class="textinput textInput form-control" value="{{user.first_name}} {{user.last_name}}" disabled>
+    <form class="mt-2" method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <fieldset class="form-group">
+            {{ form| crispy }}
+            <a style="color: #1c74fd; text-decoration: underline;" type="button" data-toggle="modal"
+                data-target="#promoteUser"><i class="fa-regular fa-circle-question"></i></a>
+        </fieldset>
+        <div class="form-group mt-3">
+            <button class="btn btn-outline-info" type="submit">Post</button>
+        </div>
+    </form>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+{{ form.media.js }}
+
+<!-- Modal -->
+<div class="modal fade" id="promoteUser" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">Tags</h4>
             </div>
-        </form>
+            <div class="modal-body">
+                <h3>What are tags?</h3>
+                <div class="mt-4">
+                    We understand you may have some questions about tags and how they work on our platform. Tags are
+                    labels
+                    that
+                    help categorize users and posts so that people can search for and discover content relevant to their
+                    interests.
+                    For example, if someone tags their post as 'Computer Science', then a user looking for computer
+                    science related
+                    content
+                    can
+                    look for posts with that tag.
+                </div>
+
+                <div class="mt-4">
+                    Posts must have one primary tag, but they can have multiple
+                    secondary
+                    tags. On the other hand, users can have zero or many tags. If a user has a tag that matches a post's
+                    tag,
+                    then the user
+                    is able to peer review it if they are verified. This is a great way to ensure quality and accuracy
+                    in the content
+                    posted. When making a post, you should think carefully about the tags you will add as this will
+                    effect the users able to review it.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
     </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    {{ form.media.js }}
+</div>
 {% endblock content %}

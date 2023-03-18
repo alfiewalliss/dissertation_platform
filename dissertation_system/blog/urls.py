@@ -63,4 +63,6 @@ urlpatterns = [
     path("reviewed/<int:pk>", views.review_form, name="review-form"),
     path("review/request/<int:pk>", views.request_review, name="request-review"),
     path('notifications/<int:pk>/update_new/', views.update_notification_new, name='update_notification_new'),
+    path('notifications/<int:pk>/delete/', views.delete_notification, name='delete_notification'),
+
 ]

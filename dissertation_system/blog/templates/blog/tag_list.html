@@ -33,7 +33,7 @@
             <article class="media content-section">
                 <div class="media-body">
                 <div class="article-metadata">
-                    <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+                    <img class="rounded-circle article-img" src="data:image/png;base64,{{ post.author.profile.blob_image }}">
                     <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
                     <small class="text-muted">{{ post.date_posted|date:"d N Y" }}</small>
                 </div>
@@ -52,7 +52,7 @@
         <article class="media content-section">
             <div class="media-body">
                 <div class="article-metadata">
-                <img class="rounded-circle article-img" src="{{ user.image.url }}">
+                <img class="rounded-circle article-img" src="data:image/png;base64,{{ user.blob_image }}">
                 <h2 style="display:inline"><a class="mr-2" href="{% url 'user-posts' user.user.username %}">{{ user.user.username }}</a></h2>
                 <pre class="text-secondary float-end mt-3 data" style="display:inline">| Followers: {{ user.followers.all.count }} | </pre>
                 <pre class="text-secondary float-end mt-3 data" style="display:inline">| Following: {{ user.following.all.count }} </pre>

@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from PIL import Image
 from blog.models import Tag, Post
 
-User._meta.get_field('email')._unique = True
+#User._meta.get_field('email')._unique = True
 
 # Create your models here.
 class Profile(models.Model):
@@ -14,7 +14,8 @@ class Profile(models.Model):
     bio = models.TextField(max_length=1000)
     admin = models.IntegerField(default=0)
     tags = models.ManyToManyField(Tag, symmetrical=False, related_name='user_tags')
-
+    first = models.IntegerField(default=0) #0 if first login else 1 if not
+    blob_image = models.TextField(db_column='data', blank=True)
 
     def __str__(self):
         return f'{self.user.username} Profile'

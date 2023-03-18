@@ -2,11 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.urls import reverse
 from datetime import datetime 
-
+import base64
 
 # Create your models here.
 class Tag(models.Model):
-    tags = models.CharField(max_length=1000)
+    tags = models.CharField(max_length=1000,unique=True)
     followers = models.ManyToManyField(User, related_name='tag_followers')
     
     def __str__(self):
@@ -18,7 +18,7 @@ class Post(models.Model):
     date_posted = models.DateTimeField(auto_now_add=True)
     publication_date = models.DateField()
     author = models.ForeignKey(User, on_delete=models.CASCADE)
-    file = models.FileField(upload_to='documents/')
+    file = models.FileField(upload_to='documents')
     likes = models.ManyToManyField(User, related_name='blog_post')
     dislikes = models.ManyToManyField(User, related_name='blog_post1')
     saves = models.ManyToManyField(User, related_name='blog_post2')
@@ -31,6 +31,7 @@ class Post(models.Model):
     requested = models.CharField(max_length=30, default="none")
     reviewers = models.ManyToManyField(User, related_name="reviewers")
     requested_time = models.DateTimeField(auto_now_add=True)
+    blob_file = models.TextField(db_column='data', blank=True)
 
     def __str__(self):
         return self.title
@@ -51,7 +52,7 @@ class Post(models.Model):
         return self.saves.count()
 
     def get_year(self):
-        return self.publication_date.year
+        return self.date_posted.year
 
     def get_ordinal(self):
         n = self.version
@@ -96,6 +97,7 @@ class Notification(models.Model):
     new = models.IntegerField(default=0) # 0 = New, 1 = Read
     heading = models.CharField(max_length=1000)
     content = models.CharField(max_length=1000)
+    date_created = models.DateTimeField(auto_now_add=True)
 
 
 

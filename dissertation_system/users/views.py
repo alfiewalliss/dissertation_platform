@@ -14,6 +14,10 @@ from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.template.loader import get_template
 from django.template import Context
+from django.contrib.auth import views as auth_views
+from django.shortcuts import resolve_url
+import base64
+
 
 UserModel = get_user_model()
 # Create your views here.
@@ -25,6 +29,11 @@ def register(request):
             user = form.save(commit=False)
             user.is_active = False
             user.save()
+            image_file = user.profile.image.open("rb")
+            encoded_base64 = base64.b64encode(image_file.read())
+            encoded_str = encoded_base64.decode('utf-8')
+            user.profile.blob_image = encoded_str
+            user.profile.save()
             current_site = get_current_site(request)
             mail_subject = "Verify your email and start using our platform!"
             uid1 = urlsafe_base64_encode(force_bytes(user.pk))
@@ -49,7 +58,7 @@ def register(request):
             )
             to_email = form.cleaned_data.get("email")
             send_mail(mail_subject, message, "noreply@dissertationexchange.com", [to_email], html_message=message_html)
-            return HttpResponse("Please confirm your email address to complete the registration")
+            return render(request, "users/complete_register.html")
     else:
         form = UserRegisterForm()
     return render(request, "users/register.html", {"form": form})
@@ -64,8 +73,9 @@ def activate(request, uidb64, token):
         user = None
     if user is not None and default_token_generator.check_token(user, token):
         user.is_active = True
+        user.last_login = None
         user.save()
-        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')
+        return render(request, "users/success_link.html")
     else:
         return HttpResponse('Activation link is invalid!')
 
@@ -78,6 +88,10 @@ def profile(request):
             request.POST, request.FILES, instance=request.user.profile
         )
         if u_form.is_valid() and p_form.is_valid():
+            image_file = p_form.instance.image.open("rb")
+            encoded_base64 = base64.b64encode(image_file.read())
+            encoded_str = encoded_base64.decode('utf-8')
+            p_form.instance.blob_image = encoded_str
             u_form.save()
             p_form.save()
             messages.success(request, "Account settings updated!")
@@ -88,3 +102,17 @@ def profile(request):
 
     context = {"u_form": u_form, "p_form": p_form}
     return render(request, "users/profile.html", context)
+
+
+class LoginView(auth_views.LoginView):
+    template_name = 'users/login.html'
+
+    def get_success_url(self):
+        print("D" + str(self.request.user.last_login))
+        user = self.request.user.profile
+        if user.first == 0:
+            print("D" + str(self.request.user.last_login))
+            messages.success(self.request, "Welcome to Dissertation Exchange! Head over to your profile to customise it!")
+            user.first = 1
+            user.save()
+        return resolve_url('blog-home')

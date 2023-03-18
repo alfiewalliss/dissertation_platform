@@ -154,3 +154,9 @@ body {
   overflow-y: auto;
   right: 0%;
 }
+
+@media only screen and (max-width: 500px){
+  .mobilehidden{
+        display: none;
+  }
+  }

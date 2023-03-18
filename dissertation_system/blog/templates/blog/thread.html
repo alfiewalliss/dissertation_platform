@@ -16,10 +16,10 @@
                 </div>
                 <div class="p-3 pt-0">
                     {% if thread.user == user %}
-                        <img class="rounded-circle article-img" src="{{ thread.receiver.profile.image.url }}">
+                        <img class="rounded-circle article-img" src="data:image/png;base64,{{ thread.receiver.profile.blob_image }}">
                         <h5 class="mr-2 w-75" style="display:inline"><a href="{% url 'user-posts' thread.receiver.username %}">{{ thread.receiver }}</a></h3>
                     {% else %}
-                        <img class="rounded-circle article-img" src="{{ thread.user.profile.image.url }}">
+                        <img class="rounded-circle article-img" src="data:image/png;base64,{{ thread.user.profile.blob_image }}">
                         <h5 class="w-75" style="display:inline" href="{% url 'user-posts' thread.user.username %}">{{ thread.user }}</a>
                     {% endif %}
                     <a href="{% url 'delete-thread' thread.pk %}" class="btn btn-danger btn-sm m-1 mt-3 float-end" data-toggle="tooltip" data-placement="top" title="Delete"><i class="fa-solid fa-trash"></i></a>

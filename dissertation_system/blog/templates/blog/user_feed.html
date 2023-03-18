@@ -1,18 +1,27 @@
 {% extends "blog/base.html" %}
 {% block content %}
 <h1>Your feed</h1>
+    {% if posts.count == 0 %}
+    <div class="row mt-5">
+      <div class="col-md-12">
+          <p class="empty-text">No Posts
+            <br>
+            <p class="text-muted text-center">To see posts related to your interests, we recommend following additional users and tags.</p>
+          </p>
+      </div>
+    </div>
+    {% endif %}
     {% for post in posts %}
     <article class="media content-section">
         <div class="media-body">
           <div class="article-metadata">
-            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+            <img class="rounded-circle article-img" src="{{ post.author.profile.blob_image }}">
             <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
             <small class="text-muted"> {{ post.date_posted|date:"d N Y" }} | </small>
             <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Likes"> {{ post.likes.all.count }} <i class="fa-solid fa-thumbs-up"></i>  | </small>
             <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Dislike"> {{ post.dislikes.all.count }} <i class="fa-solid fa-thumbs-down"></i>  | </small>
             <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Comments"> {{ post.comments.all.count }} <i class="fa-solid fa-comment"></i>  | </small>
             <small class="text-muted" data-toggle="tooltip" data-placement="top" title="Saves"> {{ post.saves.all.count }} <i class="fa-solid fa-bookmark"></i>  | </small>
-
           </div>
           <h2><a class="article-title" href="{% url 'blog-detail' post.id %}">{{ post.title }}</a></h2>
           <p class="article-content text-muted">{{ post.abstract }}</p>

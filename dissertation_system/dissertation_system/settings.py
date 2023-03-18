@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    'dissertation_system',
+    "import_export",
 ]
 
 
@@ -76,6 +78,8 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "blog.custom_context_processor.tag_renderer",
                 "blog.custom_context_processor.notification_renderer",
+                "blog.custom_context_processor.get_current_path",
+                'django.template.context_processors.request',
             ],
         },
     },

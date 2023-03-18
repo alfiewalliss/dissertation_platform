@@ -1,4 +1,5 @@
 from .models import Tag, Post, Comment, Notification
+from datetime import datetime
 def tag_renderer(request):
     return {
         "tags_context": Tag.objects.all(), 
@@ -15,3 +16,8 @@ def notification_renderer(request):
         "notification_processor": notification_processor,
         "counter": counter
     }
+
+def get_current_path(request):
+    return {
+       'date': datetime.now()
+     }

@@ -25,6 +25,7 @@ from django.contrib.sites.shortcuts import get_current_site
 from django.core.mail import send_mail
 from datetime import datetime, timedelta
 import pytz
+import base64
 
 
 # Create your views here.
@@ -209,6 +210,10 @@ class PostCreateView(LoginRequiredMixin, CreateView):
         
     def form_valid(self, form):
         form.instance.author = self.request.user
+        pdf_file = form.instance.file.open("rb")
+        encoded_base64 = base64.b64encode(pdf_file.read())
+        encoded_str = encoded_base64.decode('utf-8')
+        form.instance.blob_file = encoded_str
         messages.success(self.request, "Post successfully uploaded")
         return super(PostCreateView, self).form_valid(form)
 
@@ -237,6 +242,10 @@ class PostUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
+        pdf_file = form.instance.file.open("rb")
+        encoded_base64 = base64.b64encode(pdf_file.read())
+        encoded_str = encoded_base64.decode('utf-8')
+        form.instance.blob_file = encoded_str
         return super().form_valid(form)
 
     def test_func(self):
@@ -278,6 +287,9 @@ class PostDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return True
         else:
             return False
+
+    def get_success_url(self):
+        return reverse("user-posts", args=[self.request.user])
 
 
 class CommentDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
@@ -547,7 +559,6 @@ def tag_follow(request, pk):
     return HttpResponseRedirect(reverse("tag-list", args=[str(pk)]))
 
 def site_info(request, information):
-    print(information)
     context = {"information": information}
     return render(request, "blog/site_info.html", context)
 
@@ -652,9 +663,17 @@ def request_review(request, pk):
 def update_notification_new(request, pk):
     notification = Notification.objects.get(pk=pk)
     if(notification.new == 1):
+        notification.new = 0
         change = 1
     else:
         notification.new = 1
-        notification.save()
         change = 0
+    notification.save()
     return JsonResponse({'success': True, 'change': change})
+
+
+def delete_notification(request, pk):
+    notification = Notification.objects.get(pk=pk)
+    if request.user == notification.receiver:
+        notification.delete()
+    return JsonResponse({'success': True})

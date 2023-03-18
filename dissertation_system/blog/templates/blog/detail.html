@@ -32,6 +32,12 @@
         document.getElementById(button_id).innerHTML = '<i class="fa-solid fa-check"></i>'
         setTimeout(() => {  document.getElementById(button_id).innerHTML = '<i class="fa-solid fa-copy"></i>'; }, 2000);
     }
+
+    function pdf_tab(data)
+    {
+        var pdf_newTab = window.open("");
+        pdf_newTab.document.write("<html><head><title>your title in here</title></head><body><iframe title='MY title'  width='100%' height='100%' src='data:application/pdf;base64," + encodeURI(data) + "'></iframe></body></html>")
+    }
 </script>
 <article class="media content-section">
     <div class="media-body">
@@ -40,7 +46,7 @@
                 <h2 class="article-title"><u>{{ object.title }}</u></h2>
             </div>
             <div class="float-end mt-4 mb-2">
-                <a class="btn btn-primary float-end mr-2 mb-2" href="{{ object.file.url }}" target="_blank">View PDF In New Tab</a>
+                <button class="btn btn-primary float-end mr-2 mb-2" onclick="pdf_tab('{{ object.blob_file }}')" target="_blank">View PDF In New Tab</button>
                 {% if can_request == 1 %}
                     <a class="btn btn-info float-end m-2 mt-0" href="{% url 'request-review' object.pk %}">Request Peer Review</a>
                 {% elif can_request == 2 %}
@@ -49,7 +55,7 @@
             </div>
         </div>
         <div class="container2">
-            <iframe class="responsive-iframe" src="{{ object.file.url }}" style="height:74.3em;width:51em"></iframe>
+            <iframe class="responsive-iframe" src="data:application/pdf;base64,{{ object.blob_file }}" style="height:74.3em;width:51em"></iframe>
         </div>
     </div>
 </article>
@@ -64,7 +70,7 @@
                 <article class="media content-section">
                     <div class="media-body">
                         <div class="article-metadata">
-                            <img class="rounded-circle article-img" src="{{ comment.username.profile.image.url }}">
+                            <img class="rounded-circle article-img" src="data:image/png;base64,{{ comment.username.profile.blob_image }}">
                             <a class="mr-2" href="{% url 'user-posts' comment.username.username %}">{{ comment.username.username }}</a>
                             <small class="text-muted">{{ comment.date_added|date:"d N Y" }} {{ comment.date_added|time }} | {{ comment.likes.count }} <i class="fa-solid fa-thumbs-up"></i> | {{ comment.dislikes.count }} <i class="fa-solid fa-thumbs-down"></i></small>
                             {% if comment.username == user %}
@@ -76,7 +82,6 @@
                             <div>
                                 <a id="like" href="{% url 'blog-comment-like' post.pk comment.id %}" class="btn btn-success btn-sm m-1 float-end" data-toggle="tooltip" data-placement="top" title="Like"><i class="fa-regular fa-thumbs-up"></i></a>
                                 <a id="dislike" href="{% url 'blog-comment-dislike' post.pk comment.id %}" class="btn btn-danger btn-sm m-1 float-end" data-toggle="tooltip" data-placement="top" title="Dislike"><i class="fa-regular fa-thumbs-down"></i></a>
-                                <a href="{% url 'blog-comment-delete' comment.id %}" class="btn btn-primary btn-sm m-1 float-end" data-toggle="tooltip" data-placement="top" title="Reply"><i class="fa-solid fa-reply"></i></a>
                             </div>
                             <br>
                             <br>
@@ -102,23 +107,71 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalLabel">Cite</h5>
+                <h4 class="modal-title" id="exampleModalLabel">Cite</h4>
+            </div>
+            <div class="modal-header">
+                <h5>APA</h5>
             </div>
             <div class="modal-body">
-                APA - Full details
+                In-text Citation
                 <br>
-                <div id="1">
-                    {{object.author.last_name}}.{{object.author.first_name|make_list|first}}. ({{object.get_year}}). {{object.title}} ({{object.get_ordinal}} ed.). {{object.publisher}}
+                <div class="border p-3" style="border-radius: 1em; background-color: aliceblue;">
+                    <div id="2" style="display: inline;">
+                        ({{object.author.last_name}}, {{object.get_year}}, pp. {START_PAGE}-{END_PAGE})
+                    </div>
+                    <button id="2.1" class="btn btn-primary btn-sm float-end" style="position:relative" onclick="copy('2', this.id)"><i class="fa-solid fa-copy"></i></button>
                 </div>
-                <button id="1.1" class="btn btn-primary btn-sm mt-1 mt-0 d-inline float-end" onclick="copy('1', this.id)"><i class="fa-solid fa-copy"></i></button>
                 <br>
-                APA - Inline details
+                Reference List Entry
                 <br>
-                <div id="2">
-                    ({{object.author.last_name}}, {{object.get_year}}, pp. {START_PAGE}-{END_PAGE})
+                <div class="border p-3" style="border-radius: 1em; background-color: aliceblue;">
+                    <div id="1" style="display: inline;">
+                        {{object.author.last_name}}.{{object.author.first_name|make_list|first}}. ({{object.get_year}}). {{object.title}} ({{object.get_ordinal}} ed.). {{object.publisher}}
+                    </div>
+                    <button id="1.1" class="btn btn-primary btn-sm float-end" style="position:realtive" onclick="copy('1', this.id)"><i class="fa-solid fa-copy"></i></button>
                 </div>
-                <button id="2.1" class="btn btn-primary btn-sm mt-1 mt-0 d-inline float-end" onclick="copy('2', this.id)"><i class="fa-solid fa-copy"></i></button>
                 <br>
+            </div>
+            <div class="modal-header">
+                <h5>Harvard</h5>
+            </div>
+            <div class="modal-body">
+                In-text Citation
+                <br>
+                <div class="border p-3" style="border-radius: 1em; background-color: aliceblue;">
+                    <div id="3" style="display: inline;">
+                        ({{object.author.last_name}}, {{object.get_year}}, pp. {START_PAGE}-{END_PAGE})
+                    </div>
+                    <button id="3.1" class="btn btn-primary btn-sm float-end" style="position:realtive" onclick="copy('3', this.id)"><i class="fa-solid fa-copy"></i></button>
+                </div>
+                <br>
+                Reference List Entry
+                <br>
+                <div class="p-3" style="border-radius: 1em; background-color: aliceblue;">
+                    <div id="4" style="display: inline;">
+                        {{object.author.last_name}}, {{object.author.first_name|make_list|first}}. ({{object.get_year}}). '{{object.title}}', {{object.publisher}}, {{object.version}}, pp. {START_PAGE}-{END_PAGE}. Available at: {{ request.build_absolute_uri }} (Accessed: {{ date|date:"d/m/y " }})
+                    </div>
+                    <button id="4.1" class="btn btn-primary btn-sm float-end" style="position:realtive" onclick="copy('4', this.id)"><i class="fa-solid fa-copy"></i></button>
+                </div>
+                <br>
+            </div>
+            <div class="modal-header">
+                <h5>BiBtex</h5>
+            </div>
+            <div class="modal-body">
+                <div class="border p-3" style="border-radius: 1em; background-color: aliceblue;">
+                    <div id="5" style="display: inline;">
+                        @article{&#8202{{object.author.last_name}}{{object.get_year}},<br>
+                        &emsp;author='{{object.author.last_name}}, {{object.author.first_name}}',<br>
+                        &emsp;journal='Dissertation Exchange',<br>
+                        &emsp;month='{{object.date_posted|date:'F'}}',<br>
+                        &emsp;pages='{START_PAGE}-{END_PAGE}',<br>
+                        &emsp;title='{{object.title}}',<br>
+                        &emsp;year='{{object.get_year}}',<br>
+                        }
+                    </div>
+                    <button id="5.1" class="btn btn-primary btn-sm float-end" style="position:realtive" onclick="copy('5', this.id)"><i class="fa-solid fa-copy"></i></button>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -130,7 +183,7 @@
 
 {% block content1%}
 <div class="article-metadata position-fixed">
-    <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+    <img class="rounded-circle article-img" src="data:image/png;base64,{{ post.author.profile.blob_image }}">
     <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ object.author }}</a>
     <small class="text-muted">{{ object.date_posted|date:"d N Y" }}  |</small>
     <br>

@@ -1,12 +1,23 @@
 {% extends "blog/base.html" %}
 {% block content %}
     <h1 class="mb-3">Your Saved Posts</h1>
-    <h4>{{ page_obj.paginator.count }} posts</h4>
+    {% if posts.count == 0 %}
+    <div class="row mt-5">
+      <div class="col-md-12">
+          <p class="empty-text">No Posts
+            <br>
+            <p class="text-muted text-center">You have saved no posts.</p>
+          </p>
+      </div>
+    </div>
+    {% else %}
+      <h4>{{ page_obj.paginator.count }} posts</h4>
+    {% endif %}
     {% for post in posts %}
     <article class="media content-section">
         <div class="media-body">
           <div class="article-metadata">
-            <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+            <img class="rounded-circle article-img" src="data:image/png;base64,{{ post.author.profile.blob_image }}">
             <a class="mr-2" href="{% url 'user-posts' post.author.username %}">{{ post.author }}</a>
             <small class="text-muted">{{ post.date_posted|date:"d N Y" }}</small>
           </div>

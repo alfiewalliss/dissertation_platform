@@ -27,11 +27,13 @@ class PrimaryTagWiget(s2forms.ModelSelect2Widget):
     search_fields = [
         "tags__icontains",
     ]
+    attrs = {'data-minimum-input-length': 1}
 
 class SecondaryTagsWidget(s2forms.ModelSelect2MultipleWidget):
     search_fields = [
         "tags__icontains",
     ]
+    
 class DateInput(forms.DateInput):
     input_type = 'date'
 
